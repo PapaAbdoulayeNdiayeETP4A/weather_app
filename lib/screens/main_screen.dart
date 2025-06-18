@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
 import '../models/weather_response.dart';
 import '../services/weather_api.dart';
@@ -11,7 +14,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  WeatherResponse? forecast;
+  List<WeatherResponse> forecasts = [];
   bool isLoading = true;
   String? error;
 
@@ -25,10 +28,18 @@ class _MainScreenState extends State<MainScreen> {
     try {
       final dio = Dio();
       final api = WeatherApi(dio);
-      final result = await api.getWeatherByCity("Paris", "a815888716625f4d0475480e124cf089");
+      final cities = await getRandomCities();
+
+      List<WeatherResponse> results = [];
+
+      for (final city in cities) {
+        final result = await api.getWeatherByCity(
+            city, 'a815888716625f4d0475480e124cf089');
+        results.add(result);
+      }
 
       setState(() {
-        forecast = result;
+        forecasts = results;
         isLoading = false;
       });
     } catch (e) {
@@ -39,44 +50,38 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  Future<List<String>> getRandomCities() async {
+    final jsonString = await rootBundle.loadString('assets/cities.json');
+    final List<dynamic> allCities = json.decode(jsonString);
+    allCities.shuffle(Random());
+    return allCities.take(5).cast<String>().toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Prévision météo')),
+      appBar: AppBar(title: const Text('Prévisions météo')),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : error != null
-          ? Center(child: Text("Erreur: $error"))
-          : forecastWidget(),
-    );
-  }
+          ? Center(child: Text("Erreur : $error"))
+          : ListView.builder(
+        itemCount: forecasts.length,
+        itemBuilder: (context, index) {
+          final forecast = forecasts[index];
+          final weather = forecast.weather.isNotEmpty
+              ? forecast.weather[0]
+              : null;
+          final tempC = (forecast.main.temp - 273.15).toStringAsFixed(1);
+          final desc = weather?.description ?? "N/A";
 
-  Widget forecastWidget() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          "📍 ${forecast!.name}",
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 12),
-        Expanded(
-          child: ListView.builder(
-            itemCount: forecast!.weather.length < 10 ? forecast!.weather.length : 10,
-            itemBuilder: (context, index) {
-              final item = forecast!.weather[index];
-              //final date = DateTime.fromMillisecondsSinceEpoch(item.dt * 1000);
-             // final tempC = (item.main.temp - 273.15).toStringAsFixed(1);
-              //final desc = item.weather.first.description;
-
-              //return ListTile(
-                //leading: Text("${date.hour}h"),
-                //title: Text("$tempC°C - $desc"),
-              //);
-            },
-          ),
-        ),
-      ],
+          return ListTile(
+            leading: const Icon(Icons.location_city),
+            title: Text(forecast.name),
+            subtitle: Text("$tempC°C - $desc"),
+          );
+        },
+      ),
     );
   }
 }
