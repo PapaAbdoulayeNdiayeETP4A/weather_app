@@ -32,8 +32,9 @@ class Main {
 @JsonSerializable()
 class Weather {
   final String description;
+  final String icon;
 
-  Weather({required this.description});
+  Weather({required this.description, required this.icon});
 
   factory Weather.fromJson(Map<String, dynamic> json) => _$WeatherFromJson(json);
   Map<String, dynamic> toJson() => _$WeatherToJson(this);
