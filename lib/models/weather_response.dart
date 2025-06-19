@@ -4,7 +4,7 @@ part 'weather_response.g.dart';
 
 @JsonSerializable()
 class WeatherResponse {
-  final String name; // nom de la ville
+  final String name;
   final Main main;
   final List<Weather> weather;
   final Wind wind;

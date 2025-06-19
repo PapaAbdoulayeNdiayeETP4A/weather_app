@@ -1,5 +1,6 @@
 import 'package:retrofit/retrofit.dart';
 import 'package:dio/dio.dart';
+import '../models/forecast_response.dart';
 import '../models/weather_response.dart';
 
 part 'weather_api.g.dart';
@@ -10,6 +11,12 @@ abstract class WeatherApi {
 
   @GET("/weather")
   Future<WeatherResponse> getWeatherByCity(
+      @Query("q") String city,
+      @Query("appid") String apiKey,
+      );
+
+  @GET("/forecast")
+  Future<ForecastResponse> getForecastByCity(
       @Query("q") String city,
       @Query("appid") String apiKey,
       );

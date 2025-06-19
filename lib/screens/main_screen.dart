@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:dio/dio.dart';
+import 'package:weather_app/screens/weather_details_screen.dart';
 import '../models/weather_response.dart';
 import '../services/weather_api.dart';
 
@@ -101,14 +102,13 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void navigateToDetails(WeatherResponse forecast) {
-    // Navigation vers la page de détails
-    //Navigator.push(
-    //context,
-    //MaterialPageRoute(
-    //builder: (context) => WeatherDetailsScreen(forecast: forecast),
-    //),
-    //);
+  void navigateToDetails(String cityName) {
+    Navigator.push(
+    context,
+    MaterialPageRoute(
+    builder: (context) => WeatherDetailsScreen(cityName: cityName),
+    ),
+    );
   }
 
   @override
@@ -242,7 +242,7 @@ class _MainScreenState extends State<MainScreen> {
                     final windSpeed = forecast.wind.speed.toStringAsFixed(1);
 
                     return GestureDetector(
-                      onTap: () => navigateToDetails(forecast),
+                      onTap: () => navigateToDetails(forecast.name),
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 16),
                         decoration: BoxDecoration(
