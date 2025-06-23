@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:weather_app/models/forecast_response.dart';
 import '../models/weather_response.dart';
 import '../services/weather_api.dart';
+import '../providers/theme_provider.dart';
 
 class WeatherDetailsScreen extends StatefulWidget {
   final String cityName;
@@ -61,76 +63,99 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
     return baseUrl + icon + '@2x.png';
   }
 
+  List<Color> getGradientColors(bool isDark) {
+    if (isDark) {
+      return [
+        Colors.grey.shade800,
+        Colors.grey.shade900,
+        Colors.black87,
+        Colors.black,
+      ];
+    } else {
+      return [
+        Colors.blueAccent.shade200,
+        Colors.blueAccent.shade400,
+        Colors.blueAccent.shade700,
+        Colors.indigo.shade900,
+      ];
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body:
-          isLoading
-              ? Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.blueAccent.shade200,
-                      Colors.blueAccent.shade400,
-                      Colors.blueAccent.shade700,
-                    ],
-                  ),
-                ),
-                child: const Center(
-                  child: CircularProgressIndicator(color: Colors.white),
-                ),
-              )
-              : error != null
-              ? Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.blueAccent.shade200,
-                      Colors.blueAccent.shade400,
-                      Colors.blueAccent.shade700,
-                    ],
-                  ),
-                ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error, size: 64, color: Colors.white),
-                      const SizedBox(height: 16),
-                      Text(
-                        "Erreur: $error",
-                        style: const TextStyle(color: Colors.white),
-                        textAlign: TextAlign.center,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        final isDark = themeProvider.isDarkMode;
+
+        return Scaffold(
+          backgroundColor: isDark ? Colors.black : Colors.black,
+          body:
+              isLoading
+                  ? Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: getGradientColors(isDark),
                       ),
-                      const SizedBox(height: 16),
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            isLoading = true;
-                            error = null;
-                          });
-                          fetchWeather();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.blueAccent,
-                        ),
-                        child: const Text('Réessayer'),
+                    ),
+                    child: const Center(
+                      child: CircularProgressIndicator(color: Colors.white),
+                    ),
+                  )
+                  : error != null
+                  ? Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: getGradientColors(isDark),
                       ),
-                    ],
-                  ),
-                ),
-              )
-              : forecastWidget(),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error,
+                            size: 64,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            "Erreur: $error",
+                            style: const TextStyle(color: Colors.white),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                isLoading = true;
+                                error = null;
+                              });
+                              fetchWeather();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor:
+                                  isDark
+                                      ? Colors.grey.shade800
+                                      : Colors.blueAccent,
+                            ),
+                            child: const Text('Réessayer'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                  : forecastWidget(isDark, themeProvider),
+        );
+      },
     );
   }
 
-  Widget forecastWidget() {
+  Widget forecastWidget(bool isDark, ThemeProvider themeProvider) {
     final tempCelsius = kelvinToCelsius(currentWeather!.main.temp);
     final weather = currentWeather!.weather[0];
     final description = weather.description;
@@ -145,7 +170,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
           forecast!.city.sunset * 1000,
           isUtc: true,
         ).toLocal();
-    final formatter = DateFormat('hh:mm a');
+    final formatter = DateFormat('HH:mm');
 
     // Intervalle de 1 jour + 3 heures
     final DateTime now = DateTime.now();
@@ -214,19 +239,14 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Colors.blueAccent.shade200,
-            Colors.blueAccent.shade400,
-            Colors.blueAccent.shade700,
-            Colors.black,
-          ],
+          colors: getGradientColors(isDark),
           stops: const [0.0, 0.3, 0.7, 1.0],
         ),
       ),
       child: SafeArea(
         child: Column(
           children: [
-            // Header
+            // Header avec bouton de basculement de thème
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -236,6 +256,15 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                     icon: const Icon(Icons.arrow_back, color: Colors.white),
                   ),
                   const Spacer(),
+                  // Bouton de basculement de thème
+                  IconButton(
+                    onPressed: () => themeProvider.toggleTheme(),
+                    icon: Icon(
+                      isDark ? Icons.light_mode : Icons.dark_mode,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Text(
                     DateTime.now().toString().split(' ')[0],
                     style: TextStyle(
@@ -307,13 +336,13 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                   String timeDisplay;
 
                   final List<String> days = [
-                    'MON',
-                    'TUE',
-                    'WED',
-                    'THU',
-                    'FRI',
-                    'SAT',
-                    'SUN',
+                    'LUN',
+                    'MAR',
+                    'MER',
+                    'JEU',
+                    'VEN',
+                    'SAM',
+                    'DIM',
                   ];
                   dayName = days[dailySummary.date.weekday - 1];
 
@@ -327,10 +356,13 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                       horizontal: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
+                      color:
+                          isDark
+                              ? Colors.white.withOpacity(0.05)
+                              : Colors.white.withOpacity(0.15),
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withOpacity(isDark ? 0.1 : 0.2),
                         width: 0.5,
                       ),
                     ),
@@ -374,7 +406,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                               ),
                             ),
                             Text(
-                              'feels ${dailySummary.minTemp.toStringAsFixed(0)}°',
+                              'min ${dailySummary.minTemp.toStringAsFixed(0)}°',
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.5),
                                 fontSize: 10,
@@ -393,14 +425,18 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
 
             const Spacer(),
 
+            // Informations détaillées
             Container(
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.1),
+                color:
+                    isDark
+                        ? Colors.white.withOpacity(0.08)
+                        : Colors.white.withOpacity(0.15),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: Colors.white.withOpacity(0.2),
+                  color: Colors.white.withOpacity(isDark ? 0.15 : 0.25),
                   width: 1,
                 ),
               ),
@@ -408,13 +444,13 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   _buildDetailItem(
-                    'wind speed',
+                    'Vent',
                     '${forecast!.forecasts.first.wind.speed.toStringAsFixed(1)} m/s',
                   ),
-                  _buildDetailItem('sunrise', formatter.format(sunrise)),
-                  _buildDetailItem('sunset', formatter.format(sunset)),
+                  _buildDetailItem('Lever', formatter.format(sunrise)),
+                  _buildDetailItem('Coucher', formatter.format(sunset)),
                   _buildDetailItem(
-                    'humidity',
+                    'Humidité',
                     '${forecast!.forecasts.first.main.humidity}%',
                   ),
                 ],
