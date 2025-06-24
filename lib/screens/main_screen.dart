@@ -20,6 +20,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   List<WeatherResponse> forecasts = [];
   bool isLoading = true;
+  bool isFinished = false;
   String? error;
 
   double progress = 0.0;
@@ -41,6 +42,15 @@ class _MainScreenState extends State<MainScreen> {
 
   Future<void> fetchWeather() async {
     try {
+      setState(() {
+        isLoading = true;
+        error = null;
+        progress = 0.0;
+        currentMessage = "";
+        isFinished = false;
+        forecasts = [];
+      });
+
       final dio = Dio();
       final api = WeatherApi(dio);
       final cities = await getRandomCities();
@@ -69,11 +79,13 @@ class _MainScreenState extends State<MainScreen> {
 
       setState(() {
         isLoading = false;
+        isFinished = true;
       });
     } catch (e) {
       setState(() {
         error = e.toString();
         isLoading = false;
+        isFinished = false;
       });
     }
   }
@@ -281,175 +293,184 @@ class _MainScreenState extends State<MainScreen> {
                     onRefresh: fetchWeather,
                     child: ListView.builder(
                       padding: const EdgeInsets.all(16),
-                      itemCount: forecasts.length,
+                      itemCount: forecasts.length + (isFinished ? 1 : 0),
                       itemBuilder: (context, index) {
-                        final forecast = forecasts[index];
-                        final weather = forecast.weather[0];
-                        final tempC = forecast.main.temp - 273.15;
-                        final tempString = tempC.toStringAsFixed(1);
-                        final desc = weather.description;
-                        final icon = weather.icon;
-                        final humidity = forecast.main.humidity;
-                        final windSpeed = forecast.wind.speed.toStringAsFixed(
-                          1,
-                        );
+                        if (index < forecasts.length) {
+                          final forecast = forecasts[index];
+                          final weather = forecast.weather[0];
+                          final tempC = forecast.main.temp - 273.15;
+                          final tempString = tempC.toStringAsFixed(1);
+                          final desc = weather.description;
+                          final icon = weather.icon;
+                          final humidity = forecast.main.humidity;
+                          final windSpeed = forecast.wind.speed.toStringAsFixed(1);
 
-                        return GestureDetector(
-                          onTap: () => navigateToDetails(forecast.name),
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            decoration: BoxDecoration(
-                              color: getTemperatureColor(tempC, isDark),
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  spreadRadius: 1,
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
-                              border: Border.all(
-                                color:
-                                    isDark
-                                        ? Colors.grey.shade700
-                                        : Colors.white.withOpacity(0.8),
-                                width: 1,
-                              ),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          isDark
-                                              ? Colors.grey.shade800
-                                                  .withOpacity(0.8)
-                                              : Colors.white.withOpacity(0.8),
-                                      borderRadius: BorderRadius.circular(15),
-                                    ),
-                                    child: Image.network(
-                                      getWeatherIcon(icon),
-                                      width: 40,
-                                      height: 40,
-                                    ),
+                          return GestureDetector(
+                            onTap: () => navigateToDetails(forecast.name),
+                            child: Container(
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: getTemperatureColor(tempC, isDark),
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.2),
+                                    spreadRadius: 1,
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
                                   ),
-                                  const SizedBox(width: 20),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                ],
+                                border: Border.all(
+                                  color: isDark
+                                      ? Colors.grey.shade700
+                                      : Colors.white.withOpacity(0.8),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? Colors.grey.shade800.withOpacity(0.8)
+                                            : Colors.white.withOpacity(0.8),
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      child: Image.network(
+                                        getWeatherIcon(icon),
+                                        width: 40,
+                                        height: 40,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 20),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            forecast.name,
+                                            style: TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDark ? Colors.white : Colors.black87,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            desc,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: isDark
+                                                  ? Colors.white70
+                                                  : Colors.grey.shade600,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                Icons.water_drop_outlined,
+                                                size: 16,
+                                                color: Colors.blue.shade400,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '$humidity%',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: isDark
+                                                      ? Colors.white60
+                                                      : Colors.grey.shade700,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 16),
+                                              Icon(
+                                                Icons.air,
+                                                size: 16,
+                                                color: Colors.green.shade400,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                '$windSpeed m/s',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: isDark
+                                                      ? Colors.white60
+                                                      : Colors.grey.shade700,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Column(
                                       children: [
                                         Text(
-                                          forecast.name,
+                                          '$tempString°',
                                           style: TextStyle(
-                                            fontSize: 20,
+                                            fontSize: 28,
                                             fontWeight: FontWeight.bold,
-                                            color:
-                                                isDark
-                                                    ? Colors.white
-                                                    : Colors.black87,
+                                            color: isDark ? Colors.white : Colors.black87,
                                           ),
                                         ),
-                                        const SizedBox(height: 4),
                                         Text(
-                                          desc,
+                                          'C',
                                           style: TextStyle(
-                                            fontSize: 14,
-                                            color:
-                                                isDark
-                                                    ? Colors.white70
-                                                    : Colors.grey.shade600,
+                                            fontSize: 16,
+                                            color: isDark
+                                                ? Colors.white70
+                                                : Colors.grey.shade600,
                                             fontWeight: FontWeight.w500,
                                           ),
                                         ),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.water_drop_outlined,
-                                              size: 16,
-                                              color: Colors.blue.shade400,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              '$humidity%',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color:
-                                                    isDark
-                                                        ? Colors.white60
-                                                        : Colors.grey.shade700,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 16),
-                                            Icon(
-                                              Icons.air,
-                                              size: 16,
-                                              color: Colors.green.shade400,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Text(
-                                              '$windSpeed m/s',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                color:
-                                                    isDark
-                                                        ? Colors.white60
-                                                        : Colors.grey.shade700,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
                                       ],
                                     ),
-                                  ),
-                                  Column(
-                                    children: [
-                                      Text(
-                                        '$tempString°',
-                                        style: TextStyle(
-                                          fontSize: 28,
-                                          fontWeight: FontWeight.bold,
-                                          color:
-                                              isDark
-                                                  ? Colors.white
-                                                  : Colors.black87,
-                                        ),
-                                      ),
-                                      Text(
-                                        'C',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color:
-                                              isDark
-                                                  ? Colors.white70
-                                                  : Colors.grey.shade600,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    Icons.arrow_forward_ios,
-                                    size: 16,
-                                    color:
-                                        isDark
-                                            ? Colors.grey.shade500
-                                            : Colors.grey.shade400,
-                                  ),
-                                ],
+                                    const SizedBox(width: 8),
+                                    Icon(
+                                      Icons.arrow_forward_ios,
+                                      size: 16,
+                                      color: isDark
+                                          ? Colors.grey.shade500
+                                          : Colors.grey.shade400,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
+                          );
+                        } else {
+                          // 👇 Le bouton "Recommencer" ici
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20.0),
+                              child: ElevatedButton.icon(
+                                onPressed: fetchWeather,
+                                icon: const Icon(Icons.refresh),
+                                label: const Text(
+                                  "Recommencer",
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: isDark ? Colors.blueGrey : Colors.blueAccent,
+                                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                  elevation: 4,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
                       },
                     ),
-                  ),
+
+              ),
         );
       },
     );
