@@ -37,6 +37,7 @@ dependencies:
   dio: ^5.8.0+1
   intl: ^0.18.1
   provider: ^6.1.5
+  url_launcher: ^6.2.5
 
 
   # The following adds the Cupertino Icons font to your application.
