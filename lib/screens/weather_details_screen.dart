@@ -6,6 +6,8 @@ import 'package:weather_app/models/forecast_response.dart';
 import '../models/weather_response.dart';
 import '../services/weather_api.dart';
 import '../providers/theme_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart'; // utile selon la version
 
 class WeatherDetailsScreen extends StatefulWidget {
   final String cityName;
@@ -26,6 +28,21 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
   void initState() {
     super.initState();
     fetchWeather();
+  }
+
+  void openMap(double lat, double lon) async {
+    final url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lon';
+    final uri = Uri.parse(url);
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        debugPrint('❌ Impossible de lancer l’URL : $uri');
+      }
+    } catch (e) {
+      debugPrint('❌ Erreur dans openMap: $e');
+    }
   }
 
   Future<void> fetchWeather() async {
@@ -335,6 +352,26 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                     ),
                   ),
 
+            const SizedBox(height: 20),
+
+            ElevatedButton.icon(
+              onPressed: () => openMap(
+                forecast!.city.coord.lat,
+                forecast!.city.coord.lon,
+              ),
+              icon: const Icon(Icons.map),
+              label: const Text('Voir sur Google Maps'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.blueAccent,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 40),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
                   // Prévisions
