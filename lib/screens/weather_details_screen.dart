@@ -244,221 +244,242 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
         ),
       ),
       child: SafeArea(
-        child: Column(
-          children: [
-            // Header avec bouton de basculement de thème
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
+        child: SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight:
+                  MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom,
+            ),
+            child: IntrinsicHeight(
+              child: Column(
                 children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  ),
-                  const Spacer(),
-                  // Bouton de basculement de thème
-                  IconButton(
-                    onPressed: () => themeProvider.toggleTheme(),
-                    icon: Icon(
-                      isDark ? Icons.light_mode : Icons.dark_mode,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    DateTime.now().toString().split(' ')[0],
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Nom de la ville
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                forecast!.city.name.toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w300,
-                  letterSpacing: 2.0,
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Description
-            Text(
-              description.toUpperCase(),
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 16,
-                letterSpacing: 1.0,
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // Icône
-            Image.network(getWeatherIcon(icon), width: 100, height: 100),
-
-            const SizedBox(height: 20),
-
-            // Température principale
-            Text(
-              '${tempCelsius.toStringAsFixed(0)}°',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 120,
-                fontWeight: FontWeight.w100,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            const SizedBox(height: 40),
-
-            // Prévisions
-            Container(
-              height: 150,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: forecastsToShow.length,
-                itemBuilder: (context, index) {
-                  final dailySummary = forecastsToShow[index];
-                  String dayName;
-                  String timeDisplay;
-
-                  final List<String> days = [
-                    'LUN',
-                    'MAR',
-                    'MER',
-                    'JEU',
-                    'VEN',
-                    'SAM',
-                    'DIM',
-                  ];
-                  dayName = days[dailySummary.date.weekday - 1];
-
-                  timeDisplay = DateFormat('HH:mm').format(dailySummary.date);
-
-                  return Container(
-                    width: 85,
-                    margin: const EdgeInsets.only(right: 16),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 12,
-                      horizontal: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          isDark
-                              ? Colors.white.withOpacity(0.05)
-                              : Colors.white.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(isDark ? 0.1 : 0.2),
-                        width: 0.5,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  // Header avec bouton de basculement de thème
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
                       children: [
-                        Text(
-                          dayName,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            letterSpacing: 0.5,
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
                           ),
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          timeDisplay,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.6),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w300,
+                        const Spacer(),
+                        // Bouton de basculement de thème
+                        IconButton(
+                          onPressed: () => themeProvider.toggleTheme(),
+                          icon: Icon(
+                            isDark ? Icons.light_mode : Icons.dark_mode,
+                            color: Colors.white,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Image.network(
-                          getWeatherIcon(dailySummary.icon),
-                          width: 36,
-                          height: 36,
-                        ),
-                        const SizedBox(height: 8),
-                        Column(
-                          children: [
-                            Text(
-                              '${dailySummary.maxTemp.toStringAsFixed(0)}°',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                height: 1.1,
-                              ),
-                            ),
-                            Text(
-                              'min ${dailySummary.minTemp.toStringAsFixed(0)}°',
-                              style: TextStyle(
-                                color: Colors.white.withOpacity(0.5),
-                                fontSize: 10,
-                                fontWeight: FontWeight.w300,
-                                height: 1.1,
-                              ),
-                            ),
-                          ],
+                        const SizedBox(width: 8),
+                        Text(
+                          DateTime.now().toString().split(' ')[0],
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 14,
+                          ),
                         ),
                       ],
                     ),
-                  );
-                },
-              ),
-            ),
-
-            const Spacer(),
-
-            // Informations détaillées
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color:
-                    isDark
-                        ? Colors.white.withOpacity(0.08)
-                        : Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: Colors.white.withOpacity(isDark ? 0.15 : 0.25),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildDetailItem(
-                    'Vent',
-                    '${forecast!.forecasts.first.wind.speed.toStringAsFixed(1)} m/s',
                   ),
-                  _buildDetailItem('Lever', formatter.format(sunrise)),
-                  _buildDetailItem('Coucher', formatter.format(sunset)),
-                  _buildDetailItem(
-                    'Humidité',
-                    '${forecast!.forecasts.first.main.humidity}%',
+
+                  // Nom de la ville
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      forecast!.city.name.toUpperCase(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w300,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
                   ),
+
+                  const SizedBox(height: 8),
+
+                  // Description
+                  Text(
+                    description.toUpperCase(),
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.8),
+                      fontSize: 16,
+                      letterSpacing: 1.0,
+                    ),
+                  ),
+
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+
+                  // Icône
+                  Image.network(
+                    getWeatherIcon(icon),
+                    width: MediaQuery.of(context).size.width * 0.25,
+                    height: MediaQuery.of(context).size.width * 0.25,
+                  ),
+
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+
+                  // Température principale
+                  Text(
+                    '${tempCelsius.toStringAsFixed(0)}°',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: MediaQuery.of(context).size.width * 0.25,
+                      fontWeight: FontWeight.w100,
+                    ),
+                  ),
+
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+
+                  // Prévisions
+                  Container(
+                    height: 150,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: forecastsToShow.length,
+                      itemBuilder: (context, index) {
+                        final dailySummary = forecastsToShow[index];
+                        String dayName;
+                        String timeDisplay;
+
+                        final List<String> days = [
+                          'LUN',
+                          'MAR',
+                          'MER',
+                          'JEU',
+                          'VEN',
+                          'SAM',
+                          'DIM',
+                        ];
+                        dayName = days[dailySummary.date.weekday - 1];
+
+                        timeDisplay = DateFormat(
+                          'HH:mm',
+                        ).format(dailySummary.date);
+
+                        return Container(
+                          width: 85,
+                          margin: const EdgeInsets.only(right: 16),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                isDark
+                                    ? Colors.white.withOpacity(0.05)
+                                    : Colors.white.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(
+                                isDark ? 0.1 : 0.2,
+                              ),
+                              width: 0.5,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                dayName,
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.7),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w400,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                timeDisplay,
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.6),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w300,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Image.network(
+                                getWeatherIcon(dailySummary.icon),
+                                width: 36,
+                                height: 36,
+                              ),
+                              const SizedBox(height: 8),
+                              Column(
+                                children: [
+                                  Text(
+                                    '${dailySummary.maxTemp.toStringAsFixed(0)}°',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w600,
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                  Text(
+                                    'min ${dailySummary.minTemp.toStringAsFixed(0)}°',
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.5),
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w300,
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+
+                  const Spacer(),
+
+                  // Informations détaillées
+                  Container(
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color:
+                          isDark
+                              ? Colors.white.withOpacity(0.08)
+                              : Colors.white.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.white.withOpacity(isDark ? 0.15 : 0.25),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildDetailItem(
+                          'Vent',
+                          '${forecast!.forecasts.first.wind.speed.toStringAsFixed(1)} m/s',
+                        ),
+                        _buildDetailItem('Lever', formatter.format(sunrise)),
+                        _buildDetailItem('Coucher', formatter.format(sunset)),
+                        _buildDetailItem(
+                          'Humidité',
+                          '${forecast!.forecasts.first.main.humidity}%',
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
-
-            const SizedBox(height: 20),
-          ],
+          ),
         ),
       ),
     );
