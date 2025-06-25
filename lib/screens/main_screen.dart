@@ -99,7 +99,7 @@ class _MainScreenState extends State<MainScreen> {
 
   String getWeatherIcon(String icon) {
     final baseUrl = 'https://openweathermap.org/img/wn/';
-    return baseUrl + icon + '@2x.png';
+    return '$baseUrl$icon@2x.png';
   }
 
   Color getTemperatureColor(double tempC, bool isDarkMode) {

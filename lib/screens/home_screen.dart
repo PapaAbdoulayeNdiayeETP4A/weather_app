@@ -53,7 +53,6 @@ class _HomeScreenState extends State<HomeScreen>
   void _performSearch() {
     final searchQuery = _searchController.text.trim();
 
-    // Validation
     if (searchQuery.isEmpty) {
       setState(() {
         _searchError = "Veuillez entrer le nom d'une ville";
@@ -73,7 +72,6 @@ class _HomeScreenState extends State<HomeScreen>
       _searchError = null;
     });
 
-    // Navigation vers l'écran de détails
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -89,7 +87,6 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
     final isSmallScreen = screenHeight < 700;
 
     return Consumer<ThemeProvider>(
@@ -130,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen>
                     padding: EdgeInsets.all(isSmallScreen ? 16.0 : 24.0),
                     child: Column(
                       children: [
-                        // Bouton de basculement de thème
+                        // Thème
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
@@ -175,27 +172,22 @@ class _HomeScreenState extends State<HomeScreen>
 
                         SizedBox(height: isSmallScreen ? 16 : 20),
 
-                        // Section de recherche
                         _buildSearchSection(isSmallScreen),
 
                         SizedBox(height: isSmallScreen ? 20 : 30),
 
-                        // Section principale avec logo et titre
                         _buildMainSection(isDark, isSmallScreen),
 
                         SizedBox(height: isSmallScreen ? 16 : 20),
 
-                        // Section des fonctionnalités
                         if (!isSmallScreen) _buildFeaturesSection(),
 
                         SizedBox(height: isSmallScreen ? 16 : 20),
 
-                        // Bouton d'exploration aléatoire
                         _buildExplorationButton(isDark, isSmallScreen),
 
                         SizedBox(height: isSmallScreen ? 10 : 20),
 
-                        // Texte d'aide
                         FadeTransition(
                           opacity: _fadeAnimation,
                           child: Text(
@@ -223,7 +215,6 @@ class _HomeScreenState extends State<HomeScreen>
   Widget _buildSearchSection(bool isSmallScreen) {
     return Column(
       children: [
-        // Barre de recherche améliorée
         Container(
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.2),
@@ -306,7 +297,6 @@ class _HomeScreenState extends State<HomeScreen>
           ),
         ),
 
-        // Message d'erreur amélioré
         if (_searchError != null)
           Padding(
             padding: const EdgeInsets.only(top: 12.0),
@@ -359,11 +349,10 @@ class _HomeScreenState extends State<HomeScreen>
             ),
           ),
 
-        // Bouton de recherche optimisé
         SizedBox(height: isSmallScreen ? 16 : 20),
         Center(
-          child: Container(
-            width: isSmallScreen ? 200 : 240, // Largeur fixe plus raisonnable
+          child: SizedBox(
+            width: isSmallScreen ? 200 : 240,
             child: ElevatedButton(
               onPressed: _isSearching ? null : _performSearch,
               style: ElevatedButton.styleFrom(
@@ -383,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen>
                 ),
                 shadowColor: Colors.black.withOpacity(0.2),
               ).copyWith(
-                overlayColor: MaterialStateProperty.all(
+                overlayColor: WidgetStateProperty.all(
                   Colors.white.withOpacity(0.1),
                 ),
               ),

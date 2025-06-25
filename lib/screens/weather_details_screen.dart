@@ -7,7 +7,6 @@ import '../models/weather_response.dart';
 import '../services/weather_api.dart';
 import '../providers/theme_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart'; // utile selon la version
 
 class WeatherDetailsScreen extends StatefulWidget {
   final String cityName;
@@ -38,10 +37,10 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
       if (await canLaunchUrl(uri)) {
         await launchUrl(uri, mode: LaunchMode.externalApplication);
       } else {
-        debugPrint('❌ Impossible de lancer l’URL : $uri');
+        debugPrint('Impossible de lancer l’URL : $uri');
       }
     } catch (e) {
-      debugPrint('❌ Erreur dans openMap: $e');
+      debugPrint('Erreur: $e');
     }
   }
 
@@ -77,7 +76,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
 
   String getWeatherIcon(String icon) {
     final baseUrl = 'https://openweathermap.org/img/wn/';
-    return baseUrl + icon + '@2x.png';
+    return '$baseUrl$icon@2x.png';
   }
 
   List<Color> getGradientColors(bool isDark) {
@@ -272,7 +271,7 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
             child: IntrinsicHeight(
               child: Column(
                 children: [
-                  // Header avec bouton de basculement de thème
+                  // Header
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
@@ -285,7 +284,6 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                           ),
                         ),
                         const Spacer(),
-                        // Bouton de basculement de thème
                         IconButton(
                           onPressed: () => themeProvider.toggleTheme(),
                           icon: Icon(
@@ -352,30 +350,34 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
                     ),
                   ),
 
-            const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-            ElevatedButton.icon(
-              onPressed: () => openMap(
-                forecast!.city.coord.lat,
-                forecast!.city.coord.lon,
-              ),
-              icon: const Icon(Icons.map),
-              label: const Text('Voir sur Google Maps'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.blueAccent,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-            ),
+                  ElevatedButton.icon(
+                    onPressed:
+                        () => openMap(
+                          forecast!.city.coord.lat,
+                          forecast!.city.coord.lon,
+                        ),
+                    icon: const Icon(Icons.map),
+                    label: const Text('Voir sur Google Maps'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.blueAccent,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                  ),
 
-            const SizedBox(height: 40),
+                  const SizedBox(height: 40),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05),
 
                   // Prévisions
-                  Container(
+                  SizedBox(
                     height: 150,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
@@ -480,7 +482,6 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
 
                   const Spacer(),
 
-                  // Informations détaillées
                   Container(
                     margin: const EdgeInsets.all(16),
                     padding: const EdgeInsets.all(20),
