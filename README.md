@@ -32,6 +32,8 @@ Here’s a detailed description of each screen, based on the actual code and fea
 - **Replayability:** A “Recommencer” button lets you start another random exploration.
 - **Error Handling:** If an API error occurs, a stylish error message appears with an option to retry.
 - **Dynamic Theme:** All UI elements adapt to the light/dark theme.
+- **Random City Selection:**
+  > The app uses a local `cities.json` file containing a list of city names. Each time the user starts a random exploration, five cities are randomly selected from this file to display their weather details on the main screen. This ensures variety and a dynamic user experience.
 
 ---
 
@@ -50,9 +52,9 @@ Here’s a detailed description of each screen, based on the actual code and fea
 
 - **Theme Switching:** On every screen, a dedicated button allows smooth, instant switching (using a global provider).
 - **Navigation:** Navigation between screens uses Navigator with animated transitions:
-    - Search → City Details
-    - Home → Exploration → City Details
-    - Back is always available
+  - Search → City Details
+  - Home → Exploration → City Details
+  - Back is always available
 - **Provider:** The theme is shared app-wide via the `ThemeProvider`.
 
 ---
